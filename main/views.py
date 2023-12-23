@@ -14,7 +14,7 @@ class VideoViewSet(GenericViewSet):
         if self.action == 'retrieve_videos':
             return Video.objects.all()
     def get_serializer_class(self):
-        if self.action == 'retrieve_videos':
+        if self.action in ('retrieve_videos', 'create_video'):
             return VideoSerializer
     pagination_class = PageNumberPagination
 
@@ -30,7 +30,11 @@ class VideoViewSet(GenericViewSet):
 
     @decorators.action(detail=True)
     def create_video(self, request, *args, **kwargs):
-        pass
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @decorators.action(detail=True)
     def append_video(self, request, *args, **kwargs):
