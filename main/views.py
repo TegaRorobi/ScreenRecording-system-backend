@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status, decorators
 from .serializers import *
 from .models import *
+from conf.utils import *
 
 __all__ = 'VideoViewSet',
 
@@ -16,7 +17,7 @@ class VideoViewSet(GenericViewSet):
     def get_serializer_class(self):
         if self.action in ('retrieve_videos', 'create_video'):
             return VideoSerializer
-    pagination_class = PageNumberPagination
+    pagination_class = PaginatorGenerator()()
 
     @decorators.action(detail=False)
     def retrieve_videos(self, request, *args, **kwargs):
