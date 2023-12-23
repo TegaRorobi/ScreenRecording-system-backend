@@ -1,5 +1,8 @@
+
 from django.db import models
 import uuid
+
+__all__ = 'Video', 'VideoChunk'
 
 class Video(models.Model):
     id = models.UUIDField(default=uuid.uuid4(), primary_key=True, null=False, unique=True, editable=False)
