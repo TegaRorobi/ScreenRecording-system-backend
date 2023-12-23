@@ -1,14 +1,23 @@
 
 from pathlib import Path
+from decouple import config
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-4o&8w3miwx7kx3p5%&1e3se*(hprsvu_-73cwm*=ca47(8$kfi'
-
-DEBUG = True
-
-ALLOWED_HOSTS = []
+SECRET_KEY = config(
+    'SECRET_KEY', default='django-insecure-4o&8w3miwx7kx3p5%&1e3se*(hprsvu_-73cwm*=ca47(8$kfi', cast=str
+)
+DEBUG = config(
+    'DEBUG', default=True, cast=bool
+)
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS', default='127.0.0.1,localhost',
+    cast=lambda v:[s.strip() for s in str(v).split(',')]
+)
+ADMIN_URL = config(
+    'ADMIN_URL', default='admin', cast=lambda u:str(u)[:-1] if str(u).endswith('/') else str(u)
+)
 
 ROOT_URLCONF = 'conf.urls'
 
