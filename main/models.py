@@ -5,7 +5,7 @@ import uuid
 __all__ = 'Video', 'VideoChunk'
 
 class Video(models.Model):
-    id = models.UUIDField(default=uuid.uuid4(), primary_key=True, null=False, unique=True, editable=False)
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, null=False, unique=True, editable=False)
     title = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     video_file = models.FileField(upload_to='videos/', null=True, blank=True)
@@ -22,7 +22,7 @@ class Video(models.Model):
 
 
 class VideoChunk(models.Model):
-    id = models.UUIDField(default=uuid.uuid4(), primary_key=True, null=False, unique=True, editable=False)
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, null=False, unique=True, editable=False)
     video = models.ForeignKey(Video, on_delete=models.CASCADE, related_name='chunks')
     chunk_file = models.FileField(upload_to='video_chunks/', null=True, blank=True)
     chunk_number = models.IntegerField()
