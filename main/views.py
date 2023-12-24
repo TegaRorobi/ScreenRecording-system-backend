@@ -3,6 +3,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
 from rest_framework import status, decorators
+from django.http import Http404
 from .serializers import *
 from .models import *
 from conf.utils import *
@@ -12,8 +13,7 @@ __all__ = 'VideoViewSet',
 class VideoViewSet(GenericViewSet):
 
     def get_queryset(self):
-        if self.action == 'retrieve_videos':
-            return Video.objects.all()
+        return Video.objects.all()
     def get_serializer_class(self):
         if self.action in ('retrieve_videos', 'create_video'):
             return VideoSerializer
@@ -47,4 +47,11 @@ class VideoViewSet(GenericViewSet):
 
     @decorators.action(detail=True)
     def delete_video(self, request, *args, **kwargs):
-        pass
+        try:
+            self.get_object().delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Http404:
+            return Response({
+                'error': f'Invalid {self.lookup_url_kwarg or self.lookup_field}. Video with '
+                         f"{self.lookup_field} {kwargs.get('pk')!r} does not exist."
+            }, status=status.HTTP_404_NOT_FOUND)
