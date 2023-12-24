@@ -25,7 +25,7 @@ class VideoChunk(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, null=False, unique=True, editable=False)
     video = models.ForeignKey(Video, on_delete=models.CASCADE, related_name='chunks')
     chunk_file = models.FileField(upload_to='video_chunks/', null=True, blank=True)
-    chunk_number = models.IntegerField()
+    # chunk_number = models.IntegerField()
     # timestamps
     datetime_created = models.DateTimeField(auto_now_add=True)
     datetime_updated = models.DateTimeField(auto_now=True)
@@ -34,4 +34,4 @@ class VideoChunk(models.Model):
         ordering = ('-datetime_created',)
 
     def __str__(self):
-        return f'Chunk {self.chunk_number}: {self.video}'
+        return f'Chunk: {self.video}'
