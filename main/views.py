@@ -2,11 +2,12 @@
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
 from rest_framework import status, decorators
-from django.http import Http404
+from django.http import Http404, FileResponse
 
 from .serializers import *
 from .models import *
 from conf.utils import *
+from django.conf import settings
 
 import tempfile, os
 from moviepy.editor import VideoFileClip, concatenate_videoclips
@@ -105,7 +106,19 @@ class VideoViewSet(GenericViewSet):
 
     @decorators.action(detail=True)
     def stream_video(self, request, *args, **kwargs):
-        pass
+        try:
+            video = self.get_object()
+        except Http404:
+            return Response({
+                'error': f'Invalid {self.lookup_url_kwarg or self.lookup_field}. Video with '
+                         f"{self.lookup_field} {kwargs.get('pk')!r} does not exist."
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        chunk_generator = (chunk.chunk_file.read() for chunk in video.chunks.all())
+
+        response = FileResponse(chunk_generator, content_type='video/mp4')
+        response['Content-Disposition'] = f'inline; filename="{video.title}.mp4"'
+        return response
 
 
     @decorators.action(detail=True)
