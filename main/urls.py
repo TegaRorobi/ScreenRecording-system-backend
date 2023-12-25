@@ -11,16 +11,25 @@ urlpatterns = [
             'get':'retrieve_videos',
             'post': 'create_video'
         }),
-        name='retrieve-create-videos'
+        name='videos-list-create'
     ),
 
     re_path(
         '^videos/(?P<pk>[a-zA-Z0-9\-]+)/?$',
         VideoViewSet.as_view({
-            'get': 'stream_video',
             'post':'append_video',
+            'put':'update_video',
+            'patch':'partial_update_video',
             'delete':'delete_video',
         }),
-        name='stream-append-delete-video'
+        name='video-detail'
+    ),
+
+    re_path(
+        '^videos/(?P<pk>[a-zA-Z0-9\-]+)/stream/?$',
+        VideoViewSet.as_view({
+            'get': 'stream_video',
+        }),
+        name='video-stream'
     ),
 ]
