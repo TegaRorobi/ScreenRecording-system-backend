@@ -17,9 +17,10 @@ urlpatterns = [
     re_path(
         '^videos/(?P<pk>[a-zA-Z0-9\-]+)/?$',
         VideoViewSet.as_view({
+            'get': 'stream_video',
             'post':'append_video',
             'delete':'delete_video',
         }),
-        name='append-delete-video'
+        name='stream-append-delete-video'
     ),
 ]
