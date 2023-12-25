@@ -17,6 +17,7 @@ urlpatterns = [
     re_path(
         '^videos/(?P<pk>[a-zA-Z0-9\-]+)/?$',
         VideoViewSet.as_view({
+            'get':'retrieve_video',
             'post':'append_video',
             'put':'update_video',
             'patch':'partial_update_video',
