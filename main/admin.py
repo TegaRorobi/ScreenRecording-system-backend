@@ -9,10 +9,10 @@ class VideoAdmin(admin.ModelAdmin):
 admin.site.register(Video, VideoAdmin)
 
 class VideoChunkAdmin(admin.ModelAdmin):
-    list_display = 'id', '_video', 'chunk_number'
-    search_fields = 'video', 'chunk_number'
+    list_display = 'id', '_video'#, 'chunk_number'
+    search_fields = 'video', # 'chunk_number'
     list_filter = 'datetime_created',
     @admin.display()
-    def _video(self):
-        return self.video.__str__()
+    def _video(self, obj):
+        return obj.video.__str__()
 admin.site.register(VideoChunk, VideoChunkAdmin)

@@ -14,4 +14,4 @@ class VideoChunkSerializer(serializers.ModelSerializer):
     class Meta:
         model = VideoChunk
         fields = '__all__'
-        read_only_fields = 'id', 'chunk_number', 'datetime_created', 'datetime_updated'
+        read_only_fields = 'id', 'video', 'datetime_created', 'datetime_updated'
