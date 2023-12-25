@@ -22,7 +22,7 @@ class VideoViewSet(GenericViewSet):
         return Video.objects.all()
 
     def get_serializer_class(self):
-        if self.action in ('retrieve_videos', 'create_video'):
+        if self.action in ('retrieve_videos', 'create_video', 'update_video'):
             return VideoSerializer
         elif self.action == 'append_video':
             return VideoChunkSerializer
@@ -119,6 +119,31 @@ class VideoViewSet(GenericViewSet):
         response = FileResponse(chunk_generator, content_type='video/mp4')
         response['Content-Disposition'] = f'inline; filename="{video.title}.mp4"'
         return response
+
+
+    @decorators.action(detail=True)
+    def update_video(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+        except Http404:
+            return Response({
+                'error': f'Invalid {self.lookup_url_kwarg or self.lookup_field}. Video with '
+                         f"{self.lookup_field} {kwargs.get('pk')!r} does not exist."
+            }, status=status.HTTP_404_NOT_FOUND)
+        partial = kwargs.pop('partial', False)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        if serializer.is_valid():
+            serializer.save()
+            if getattr(instance, '_prefetched_objects_cache', None):
+                instance._prefetched_objects_cache = {}
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    @decorators.action(detail=True)
+    def partial_update_video(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update_video(request, *args, **kwargs)
 
 
     @decorators.action(detail=True)
