@@ -22,10 +22,9 @@ class VideoViewSet(GenericViewSet):
         return Video.objects.all()
 
     def get_serializer_class(self):
-        if self.action in ('retrieve_videos', 'create_video', 'update_video'):
-            return VideoSerializer
-        elif self.action == 'append_video':
+        if self.action == 'append_video':
             return VideoChunkSerializer
+        return VideoSerializer
 
     pagination_class = PaginatorGenerator()()
 
@@ -52,6 +51,19 @@ class VideoViewSet(GenericViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    @decorators.action(detail=True)
+    def retrieve_video(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+        except Http404:
+            return Response({
+                'error': f'Invalid {self.lookup_url_kwarg or self.lookup_field}. Video with '
+                         f"{self.lookup_field} {kwargs.get('pk')!r} does not exist."
+            }, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
     @decorators.action(detail=True)
