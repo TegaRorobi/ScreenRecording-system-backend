@@ -2,3 +2,4 @@ Django
 djangorestframework
 Pillow
 python-decouple
+drf-yasg

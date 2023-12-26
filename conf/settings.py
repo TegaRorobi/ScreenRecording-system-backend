@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     # third party libraries
     'rest_framework',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
