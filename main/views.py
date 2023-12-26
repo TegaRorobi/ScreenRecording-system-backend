@@ -12,6 +12,7 @@ from django.conf import settings
 import tempfile, os
 from moviepy.editor import VideoFileClip, concatenate_videoclips
 
+from drf_yasg.utils import swagger_auto_schema
 
 __all__ = 'VideoViewSet',
 
@@ -34,6 +35,7 @@ class VideoViewSet(GenericViewSet):
 
 
     @decorators.action(detail=False)
+    @swagger_auto_schema(tags=['API Endpoints'])
     def retrieve_videos(self, request, *args, **kwargs):
         videos = self.get_queryset()
         page = self.paginate_queryset(videos)
@@ -45,6 +47,7 @@ class VideoViewSet(GenericViewSet):
 
 
     @decorators.action(detail=True)
+    @swagger_auto_schema(tags=['API Endpoints'])
     def create_video(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -54,6 +57,7 @@ class VideoViewSet(GenericViewSet):
 
 
     @decorators.action(detail=True)
+    @swagger_auto_schema(tags=['API Endpoints'])
     def retrieve_video(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -67,6 +71,7 @@ class VideoViewSet(GenericViewSet):
 
 
     @decorators.action(detail=True)
+    @swagger_auto_schema(tags=['API Endpoints'])
     def append_video(self, request, *args, **kwargs):
 
         try:
@@ -117,6 +122,7 @@ class VideoViewSet(GenericViewSet):
 
 
     @decorators.action(detail=True)
+    @swagger_auto_schema(tags=['API Endpoints'])
     def stream_video(self, request, *args, **kwargs):
         try:
             video = self.get_object()
@@ -134,6 +140,7 @@ class VideoViewSet(GenericViewSet):
 
 
     @decorators.action(detail=True)
+    @swagger_auto_schema(tags=['API Endpoints'])
     def update_video(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -153,12 +160,14 @@ class VideoViewSet(GenericViewSet):
 
 
     @decorators.action(detail=True)
+    @swagger_auto_schema(tags=['API Endpoints'])
     def partial_update_video(self, request, *args, **kwargs):
         kwargs['partial'] = True
         return self.update_video(request, *args, **kwargs)
 
 
     @decorators.action(detail=True)
+    @swagger_auto_schema(tags=['API Endpoints'])
     def delete_video(self, request, *args, **kwargs):
         try:
             self.get_object().delete()
