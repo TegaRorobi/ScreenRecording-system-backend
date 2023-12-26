@@ -35,7 +35,10 @@ class VideoViewSet(GenericViewSet):
 
 
     @decorators.action(detail=False)
-    @swagger_auto_schema(tags=['API Endpoints'])
+    @swagger_auto_schema(
+        tags=['API Endpoints'],
+        operation_summary=('API Endpoint to retrieve a paginated response of all videos')
+    )
     def retrieve_videos(self, request, *args, **kwargs):
         videos = self.get_queryset()
         page = self.paginate_queryset(videos)
@@ -47,7 +50,10 @@ class VideoViewSet(GenericViewSet):
 
 
     @decorators.action(detail=True)
-    @swagger_auto_schema(tags=['API Endpoints'])
+    @swagger_auto_schema(
+        tags=['API Endpoints'],
+        operation_summary=('API Endpoint to create a new video')
+    )
     def create_video(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -57,7 +63,10 @@ class VideoViewSet(GenericViewSet):
 
 
     @decorators.action(detail=True)
-    @swagger_auto_schema(tags=['API Endpoints'])
+    @swagger_auto_schema(
+        tags=['API Endpoints'],
+        operation_summary=('API Endpoint to retrieve the details of a specific video retrieved by UUID')
+    )
     def retrieve_video(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -71,7 +80,10 @@ class VideoViewSet(GenericViewSet):
 
 
     @decorators.action(detail=True)
-    @swagger_auto_schema(tags=['API Endpoints'])
+    @swagger_auto_schema(
+        tags=['API Endpoints'],
+        operation_summary=('API Endpoint to append to an existing video retrieved by UUID')
+    )
     def append_video(self, request, *args, **kwargs):
 
         try:
@@ -122,7 +134,10 @@ class VideoViewSet(GenericViewSet):
 
 
     @decorators.action(detail=True)
-    @swagger_auto_schema(tags=['API Endpoints'])
+    @swagger_auto_schema(
+        tags=['API Endpoints'],
+        operation_summary=('API Endpoint to stream out a specific video retrieved by UUID')
+    )
     def stream_video(self, request, *args, **kwargs):
         try:
             video = self.get_object()
@@ -140,7 +155,10 @@ class VideoViewSet(GenericViewSet):
 
 
     @decorators.action(detail=True)
-    @swagger_auto_schema(tags=['API Endpoints'])
+    @swagger_auto_schema(
+        tags=['API Endpoints'],
+        operation_summary=('API Endpoint to update all writeable fields of a specific video retrieved by UUID')
+    )
     def update_video(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -160,14 +178,20 @@ class VideoViewSet(GenericViewSet):
 
 
     @decorators.action(detail=True)
-    @swagger_auto_schema(tags=['API Endpoints'])
+    @swagger_auto_schema(
+        tags=['API Endpoints'],
+        operation_summary=('API Endpoint to update some writeable fields of a specific video retrieved by UUID')
+    )
     def partial_update_video(self, request, *args, **kwargs):
         kwargs['partial'] = True
         return self.update_video(request, *args, **kwargs)
 
 
     @decorators.action(detail=True)
-    @swagger_auto_schema(tags=['API Endpoints'])
+    @swagger_auto_schema(
+        tags=['API Endpoints'],
+        operation_summary=('API Endpoint to delete a specific video retrieved by UUID')
+    )
     def delete_video(self, request, *args, **kwargs):
         try:
             self.get_object().delete()
