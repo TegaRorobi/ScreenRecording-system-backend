@@ -31,7 +31,7 @@ class VideoChunk(models.Model):
     datetime_updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ('-datetime_created',)
+        ordering = ('datetime_created',)
 
     def __str__(self):
         return f'Chunk: {self.video}'
