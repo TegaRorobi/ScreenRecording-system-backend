@@ -43,6 +43,8 @@ def dequeue_append_video(channel, method, properties, body):
             del existing_clip, new_clip, final_clip, final_clip_tempfile
             os.remove(final_clip_tempfile_path)
 
+        # transcribe the video and update the transcription
+
     except Exception as e:
         print(f"An error occurred during message processing: \n{'-'*44}\n\n {e}")
 
@@ -54,7 +56,7 @@ def create_rabbitmq_connection():
             channel = connection.channel()
             channel.queue_declare('append_video')
             channel.basic_consume(queue='append_video', auto_ack=True, on_message_callback=dequeue_append_video)
-            print('Consuming started on queue \'append_video\'...')
+            print('Awaiting messages to consume on the \'append_video\' queue... To exit, press CTRL+C.')
             channel.start_consuming()
         except pika.exceptions.AMQPConnectionError as e:
             print(f"Connection to RabbitMQ failed: {e}. Retrying...")
