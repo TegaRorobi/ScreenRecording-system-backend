@@ -36,6 +36,7 @@ def dequeue_append_video(channel, method, properties, body):
             final_clip.write_videofile(final_clip_tempfile_path)
 
             final_clip_tempfile.seek(0)
+            os.remove(video_file_path)
             video.video_file.save(f'{video_pk}.mp4', final_clip_tempfile)
 
             final_clip_tempfile.close()
