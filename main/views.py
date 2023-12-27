@@ -9,10 +9,10 @@ from .models import *
 from conf.utils import *
 from django.conf import settings
 
-import tempfile, os
-from moviepy.editor import VideoFileClip, concatenate_videoclips
-
 from drf_yasg.utils import swagger_auto_schema
+
+import pika, json
+
 
 __all__ = 'VideoViewSet',
 
@@ -29,9 +29,13 @@ class VideoViewSet(GenericViewSet):
 
     pagination_class = PaginatorGenerator()()
 
-    def remove_paths(self, *filepaths):
-        for fpath in filepaths:
-            os.remove(fpath)
+    def enqueue_video_append(self, *, queue_name:str, message:str):
+        connection_parameters = pika.ConnectionParameters('localhost')
+        connection = pika.BlockingConnection(connection_parameters)
+        channel = connection.channel()
+        channel.queue_declare(queue=queue_name)
+        channel.basic_publish(exchange='', routing_key=queue_name, body=message)
+        connection.close()
 
 
     @decorators.action(detail=False)
@@ -96,38 +100,19 @@ class VideoViewSet(GenericViewSet):
 
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(video=video)
-            chunk_file = serializer.validated_data['chunk_file']
-            video_filename = f'{video.id}.mp4'
+            chunk = serializer.save(video=video)
 
             if not video.video_file:
-                video.video_file.save(video_filename, chunk_file)
+                video.video_file.save(f'{video.id}.mp4', chunk.chunk_file)
 
             else:
-                existing_clip_tempfile = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
-                existing_clip_tempfile.write(video.video_file.read())
-                existing_clip_tempfile.seek(0)
-                existing_clip_tempfile_path = existing_clip_tempfile.name
-                existing_clip = VideoFileClip(existing_clip_tempfile_path)
-                # print(existing_clip_tempfile, existing_clip_tempfile_path, existing_clip, '\n\n', sep='\n')
-
-                new_clip_tempfile =  tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
-                new_clip_tempfile.write(chunk_file.read())
-                new_clip_tempfile.seek(0)
-                new_clip_tempfile_path = new_clip_tempfile.name
-                new_clip = VideoFileClip(new_clip_tempfile_path)
-                # print(new_clip_tempfile, new_clip_tempfile_path, new_clip, '\n\n', sep='\n')
-
-                final_clip_tempfile = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
-                final_clip = concatenate_videoclips([existing_clip, new_clip])
-                final_clip_tempfile_path = final_clip_tempfile.name
-                final_clip.write_videofile(final_clip_tempfile_path)
-                # print(final_clip_tempfile, final_clip_tempfile.name, final_clip, '\n\n', sep='\n')
-
-                final_clip_tempfile.seek(0)
-                video.video_file.save(video_filename, final_clip_tempfile)
-
-                self.remove_paths(existing_clip_tempfile_path, new_clip_tempfile_path, final_clip_tempfile_path)
+                chunk_file_path = str(settings.BASE_DIR) + chunk.chunk_file.url
+                message = {
+                    'video_pk': str(video.pk),
+                    'chunk_file_path': chunk_file_path
+                }
+                self.enqueue_video_append(queue_name='append_video', message=json.dumps(message))
+                print('Successfully enqueued:', json.dumps(message, indent=4))
 
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
