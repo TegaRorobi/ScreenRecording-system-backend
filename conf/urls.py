@@ -14,7 +14,7 @@ schema_view = get_schema_view(
         title='Screen Recording API',
         description='An API backend for a screen recording browswer extension built with Django REST Framework',
         default_version=api_version,
-        contact=openapi.Contact(email='support@screenrec.project'),
+        contact=openapi.Contact(email='rorobitega@gmail.com'),
         terms_of_service=openapi.License('BSD License'),
     ),
     public=True,
