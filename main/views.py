@@ -132,9 +132,14 @@ class VideoViewSet(GenericViewSet):
                          f"{self.lookup_field} {kwargs.get('pk')!r} does not exist."
             }, status=status.HTTP_404_NOT_FOUND)
 
-        chunk_generator = (chunk.chunk_file.read() for chunk in video.chunks.all())
+        def chunk_generator(video_file=video.video_file, chunk_size=1024*1024):
+            while True:
+                chunk = video_file.read(chunk_size)
+                if not chunk:
+                    break
+                yield chunk
 
-        response = FileResponse(chunk_generator, content_type='video/mp4')
+        response = FileResponse(chunk_generator(), content_type='video/mp4')
         response['Content-Disposition'] = f'inline; filename="{video.title}.mp4"'
         return response
 
