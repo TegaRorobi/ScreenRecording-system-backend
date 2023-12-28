@@ -11,11 +11,24 @@ from django.conf import settings
 import pika, json, tempfile
 from moviepy.editor import VideoFileClip, concatenate_videoclips
 
+import requests
+
+
 TEMPFILE_DIR = settings.BASE_DIR / 'temp'
 try:
     os.mkdir(TEMPFILE_DIR)
 except FileExistsError:
     pass
+
+def transcribe_audio(audio_tempfile_path):
+    endpoint = 'https://api.openai.com/v1/audio/translations'
+    headers = {'Authorization': f'Bearer {settings.OPENAI_API_KEY}'}
+    data = {'model': 'whisper-1'}
+    files = {'file': open(audio_tempfile_path, 'rb')}
+    response = requests.post(endpoint, data=data, files=files, headers=headers)
+    print(response, response.json(), sep='\n')
+    if hasattr(response, 'json'):
+        return response.json().get('text')
 
 def dequeue_append_video(channel, method, properties, body):
     try:
@@ -27,23 +40,38 @@ def dequeue_append_video(channel, method, properties, body):
         video_file_path = str(settings.BASE_DIR) + video.video_file.url
 
         with tempfile.NamedTemporaryFile(dir=TEMPFILE_DIR, delete=False, suffix='.mp4') as final_clip_tempfile:
-            print(video_file_path, chunk_file_path)
             existing_clip = VideoFileClip(video_file_path)
             new_clip = VideoFileClip(chunk_file_path)
 
             final_clip = concatenate_videoclips([existing_clip, new_clip])
             final_clip_tempfile_path = final_clip_tempfile.name
-            final_clip.write_videofile(final_clip_tempfile_path)
+            audio_tempfile_path = TEMPFILE_DIR / f'audio_{video_pk}.mp3'
+            final_clip.write_videofile(
+                final_clip_tempfile_path,
+                temp_audiofile=audio_tempfile_path,
+                remove_temp=False,
+            )
 
             final_clip_tempfile.seek(0)
-            os.remove(video_file_path)
+            if os.path.exists(video_file_path):
+                os.remove(video_file_path)
             video.video_file.save(f'{video_pk}.mp4', final_clip_tempfile)
 
             final_clip_tempfile.close()
             del existing_clip, new_clip, final_clip, final_clip_tempfile
-            os.remove(final_clip_tempfile_path)
+            if os.path.exists(final_clip_tempfile_path):
+                os.remove(final_clip_tempfile_path)
 
         # transcribe the video and update the transcription
+        transcription = transcribe_audio(audio_tempfile_path)
+        if not transcription:
+            print('No transcription found')
+            return
+        video.transcription = transcription
+        video.save()
+        print('Transcription updated successfully')
+        if os.path.exists(audio_tempfile_path):
+            os.remove(audio_tempfile_path)
 
     except Exception as e:
         print(f"An error occurred during message processing: \n{'-'*44}\n\n {e}")
