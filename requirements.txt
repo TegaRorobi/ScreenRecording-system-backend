@@ -3,3 +3,4 @@ djangorestframework
 Pillow
 python-decouple
 drf-yasg
+requests
