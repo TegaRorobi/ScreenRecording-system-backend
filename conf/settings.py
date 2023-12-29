@@ -19,6 +19,8 @@ ADMIN_URL = config(
     'ADMIN_URL', default='admin', cast=lambda u:str(u)[:-1] if str(u).endswith('/') else str(u)
 )
 
+OPENAI_API_KEY = config('OPENAI_API_KEY', cast=str)
+
 ROOT_URLCONF = 'conf.urls'
 
 WSGI_APPLICATION = 'conf.wsgi.application'

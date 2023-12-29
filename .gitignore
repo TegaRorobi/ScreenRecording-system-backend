@@ -1,6 +1,8 @@
 
+.env
 venv/
 */migrations/0*.py
 *__pycache__/
 db.sqlite3
 media/
+temp/

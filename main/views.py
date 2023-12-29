@@ -102,17 +102,14 @@ class VideoViewSet(GenericViewSet):
         if serializer.is_valid():
             chunk = serializer.save(video=video)
 
-            if not video.video_file:
-                video.video_file.save(f'{video.id}.mp4', chunk.chunk_file)
-
-            else:
-                chunk_file_path = str(settings.BASE_DIR) + chunk.chunk_file.url
-                message = {
-                    'video_pk': str(video.pk),
-                    'chunk_file_path': chunk_file_path
-                }
-                self.enqueue_video_append(queue_name='append_video', message=json.dumps(message))
-                print('Successfully enqueued:', json.dumps(message, indent=4))
+            chunk_file_path = str(settings.BASE_DIR) + chunk.chunk_file.url
+            message = {
+                'video_pk': str(video.pk),
+                'chunk_file_path': chunk_file_path,
+                'is_first_chunk': not video.video_file
+            }
+            self.enqueue_video_append(queue_name='append_video', message=json.dumps(message))
+            print('Successfully enqueued:', json.dumps(message, indent=4))
 
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
